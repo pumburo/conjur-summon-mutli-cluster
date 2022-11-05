@@ -1,0 +1,8 @@
+- !permit
+  role: !host test_summon-app
+  privileges:
+    - read
+    - execute
+  resource: 
+    - !variable test_secrets/username
+    - !variable test_secrets/password

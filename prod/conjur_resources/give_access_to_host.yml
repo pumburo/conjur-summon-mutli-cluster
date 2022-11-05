@@ -1,0 +1,8 @@
+- !permit
+  role: !host prod_summon-app
+  privileges:
+    - read
+    - execute
+  resource: 
+    - !variable prod_secrets/username
+    - !variable prod_secrets/password

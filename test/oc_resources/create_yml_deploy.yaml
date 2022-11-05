@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: summon-app-w-create
+  name: summon-app-w-create
+  namespace: conjur-test-applications
+spec:
+  selector:
+    matchLabels:
+      app: summon-app-w-create
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: summon-app-w-create
+    spec:
+      serviceAccountName: summon-app-sa
+      containers:
+        - name: summon-app-w-create
+          image: docker.io/pumburo/create-yml-example:1.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+          - configMapRef:
+              name: conjur-cm
+          volumeMounts:
+          - mountPath: /run/conjur
+            name: conjur-access-token
+            readOnly: true
+          env:
+            - name: SECRET_PATH_1
+              value: test_secrets/username
+            - name: SECRET_PATH_2
+              value: test_secrets/password
+      initContainers:
+      - image: registry.swo.local:5000/cyberark/conjur-authn-k8s-client:latest
+        imagePullPolicy: IfNotPresent
+        name: authenticator
+        env:
+          - name: CONTAINER_MODE
+            value: init
+          - name: MY_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: MY_POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+        envFrom:
+          - configMapRef:
+              name: conjur-cm
+        volumeMounts:
+          - mountPath: /run/conjur
+            name: conjur-access-token
+      volumes:
+        - name: conjur-access-token
+          emptyDir:
+            medium: Memory

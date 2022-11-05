@@ -1,0 +1,12 @@
+- !host
+  id: test_summon-app
+  annotations:
+    authn-k8s/namespace: conjur-test-applications
+    authn-k8s/service-account: summon-app-sa
+    authn-k8s/authentication-container-name: authenticator
+
+- !grant
+  roles:
+  - !group conjur/authn-k8s/prod/consumers
+  members:
+  - !host test_summon-app
